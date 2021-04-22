@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('imports') %> 
+    <title>Regisztráció</title>
+</head>
+<body>
+    <h1>Regisztráció</h1>
+<form action="/register" method="POST">
+    <div>
+        <label class="form-label" for="name">Név</label>
+        <input class="form-control" type="text" id="name" name="name">
+    </div>
+    <div>
+        <label class="form-label" for="password">Jelszó</label>
+        <input class="form-control" type="password" id="password" name="password">
+    </div>
+    <input type="hidden" name="type" value="<%= type %>">
+    <div>
+        <input type="submit" class="btn btn-primary my-3" value="Regisztráció" name="submit">
+    </div>
+</form>
+
+<a href="/login?type=HALLGATO">Bejelentkezes hallgatóknak</a> <br>
+<a href="/login?type=OKTATO">Bejelentkezes oktatoknak</a>
+</body>
+</html>

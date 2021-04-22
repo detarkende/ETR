@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('imports') %> 
+    <title>Bejelentkezes</title>
+</head>
+<body>
+    <h1>Bejelentkezes</h1>
+<form action="/login" method="POST">
+    <div>
+        <label class="form-label" for="id">ID</label>
+        <input class="form-control" type="text" id="id" name="id">
+    </div>
+    <div>
+        <label class="form-label" for="password">Jelszó</label>
+        <input class="form-control" type="password" id="password" name="password">
+    </div>
+    <div>
+        <input class="btn btn-primary my-3" type="submit" value="Bejelentkezes" name="submit">
+    </div>
+    <% if (error != undefined) { %>
+     <p class="text-danger"> <%= error %> </p>
+    <% } %>
+    <input type="hidden" name="type" value="<%= type %>">
+</form>
+
+<a href="/register?type=HALLGATO">Regisztráció hallgatóknak</a> <br>
+<a href="/register?type=OKTATO">Regisztráció oktatoknak</a>
+</body>
+</html>

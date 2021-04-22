@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('imports') %> 
+    <title>Irányítópult</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-space-between">
+        <div class="container justify-content-betwen">
+            <a class="navbar-brand fw-bold" href="#">ETR</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+        
+            <div class="collapse navbar-collapse justify-content-end" id="navbarColor02">
+                <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Tab 1</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Tab 2</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Tab 3</button>
+                    </li>
+                    <li>
+                        <a href="/logout" class="btn btn-secondary">Kijelentkezés</a>
+                    </li>
+                  </ul>
+            </div>
+        </div>
+      </nav>
+
+
+      <div class="container">
+        <div class="tab-content mt-5" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. In obcaecati exercitationem magni explicabo officia! Nesciunt dolore culpa obcaecati! Earum, eaque!
+            </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eveniet iure accusamus dicta autem quos id dignissimos sapiente quasi ut minus.
+            </div>
+            <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Delectus cupiditate tempora soluta aliquid pariatur tempore dignissimos facilis incidunt ad voluptatibus labore corporis fuga, voluptatem vel earum magni, consectetur excepturi sequi nam similique repudiandae! Quod, sapiente minima expedita accusamus mollitia at.
+            </div>
+          </div>
+      </div>
+</body>
+</html>
