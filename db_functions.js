@@ -3,6 +3,10 @@ const bcrypt = require('bcrypt');
 
 oracledb.autoCommit = true;
 
+if (process.platform === "win32") {
+    oracledb.initOracleClient({libDir: 'C:\oracle\instantclient_19_10'});
+}
+
 async function conn() {
     var connection = await oracledb.getConnection({
         user: "ADMIN",
@@ -11,6 +15,10 @@ async function conn() {
     });
     return await connection;
 }
+
+
+
+
 
 /**
  * 
@@ -31,6 +39,12 @@ async function register(name, pw, table) {
     let id = await tempConn.execute(`SELECT MAX(${table}ID) FROM ${table}`);
     return await id.rows[0][0];
 }
+
+
+
+
+
+
 
 /**
  * 
