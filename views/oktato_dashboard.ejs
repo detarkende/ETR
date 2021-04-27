@@ -1,0 +1,111 @@
+<div class="row">
+    <div class="col col-sm-3 min-vh-100 bg-light p-5">
+
+        <!--KURZUSOK-->
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="kurzusokButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Kurzusok
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="kurzusokButton">
+              <li><a class="dropdown-item" href="#ujKurzusPage">Új kurzus létrehozása</a></li>
+              <li><a class="dropdown-item" href="#osszesKurzusomPage">Összes kurzusom</a></li>
+            </ul>
+          </div>
+
+          <!--VIZSGAK-->
+          <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="vizsgakButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Vizsgák
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="vizsgakButton">
+              <li><a class="dropdown-item" href="#ujVizsgaPage">Új vizsga létrehozása</a></li>
+              <li><a class="dropdown-item" href="#osszesVizsgamPage">Összes vizsgám</a></li>
+            </ul>
+          </div>
+    </div>
+    <div class="col" id="content" style="padding-top: 70px;">
+        <div id="ujKurzusPage" class="d-none">
+            <form>
+                <label for="kurzusnev">Kurzus neve</label>
+                <input type="text" class="form-control" maxlength="50" id="kurzusnev">
+                <button id="ujKurzusHozzaadasa" class="btn btn-primary my-3">Hozzáadás</button>
+            </form>
+        </div>
+
+        <div id="osszesKurzusomPage" class="d-none">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Kurzus azonosítója</th>
+                        <th>Kurzus neve</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+        <div id="ujVizsgaPage" class="d-none">
+            <form>
+                <label for="vizsgaNev">Vizsga neve</label>
+                <input type="text" class="form-control" maxlength="50" id="vizsgaNev">
+
+                <label for="vizsgaIdopontja">Vizsga kezdetének időpontja</label>
+                <input type="time" class="form-control" name="kezdesiIdo" id="vizsgaIdopontja">
+
+                <label for="vizsgaHossza">Vizsga hossza (percben)</label>
+                <input type="number" class="form-control" name="vizsgaHossz" min="0" step="5" id="vizsgaHossza">
+                <button id="ujVizsgaHozzaadasa" class="btn btn-primary my-3">Hozzáadás</button>
+            </form>
+        </div>
+
+        <div id="osszesVizsgamPage" class="d-none">
+            
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    window.$ = document.querySelector.bind(document);
+    window.$$ = document.querySelectorAll.bind(document);
+
+    $$('[href^="#"]').forEach(item => {
+        item.addEventListener('click', () => {
+            $$('#content > div').forEach(item => {item.classList.add('d-none')});
+            $('#content > ' + item.attributes.href.value).classList.remove('d-none');
+        })
+    });
+
+    $('#ujKurzusHozzaadasa').onclick = async (e) => {
+        e.preventDefault();
+        if (e.currentTarget.parentNode.matches(':valid')){
+            let nev = $('#kurzusnev').value;
+            let response = await fetch('/api/ujKurzus', {method: 'POST', body: JSON.stringify({body: nev})});
+            if (response.status == 500) {
+                alert('Szerverhiba, 500')
+            }
+        }
+    }
+
+    $('[href="#osszesKurzusomPage"]').onclick = async () => {
+        let kurzusok = await fetch('/api/osszesKurzusom');
+        console.log(kurzusok);
+        kurzusok = await JSON.parse(kurzusok.json);
+        console.log(kurzusok);
+        let html = '';
+        kurzusok.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+            </tr>`;
+        });
+        $('#osszesKurzusomPage tbody').innerHTML = html;
+    }
+
+</script>

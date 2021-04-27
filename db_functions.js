@@ -66,7 +66,7 @@ async function login(id, password, table) {
         return;
     }
     if (await bcrypt.compare(password, user.rows[0][1])) {
-        return [ user.rows[0][0], user.rows[0][2] ];
+        return [ user.rows[0][0], user.rows[0][2], table.toLowerCase() ];
     }
     else {
         throw 'Helytelen jelszo.';
@@ -74,7 +74,21 @@ async function login(id, password, table) {
     }
 }
 
+async function ujKurzus(id, nev) {
+    let tempConn = await conn();
+    await tempConn.execute(`INSERT INTO KURZUS (OKTATOID, KURZUSNEV) VALUES(:id, :nev)`, [id, nev]);
+    return;
+}
+
+async function osszesKurzusom(id) {
+    let tempConn = await conn();
+    let user = await tempConn.execute(`SELECT * FROM KURZUS WHERE OKTATOID = :id`, [id]);
+    return user.rows;
+}
+
 
 
 exports.register = register;
 exports.login = login;
+exports.ujKurzus = ujKurzus;
+exports.osszesKurzusom = osszesKurzusom;

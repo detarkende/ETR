@@ -2,6 +2,7 @@ const express = require('express');
 const db = require('./db_functions');
 const app = express();
 const session = require('express-session');
+const e = require('express');
 
 
 
@@ -52,6 +53,7 @@ app.post('/login', async (req, res) => {
         user = await db.login(id, password, type);
         req.session.userID = user[0];
         req.session.usersName = user[1];
+        req.session.userType = user[2];
         res.redirect('/dashboard');
     }
     catch (err) {
@@ -75,13 +77,13 @@ app.post('/register', async (req, res) => {
 
 // NEW-ACCOUNT
 app.get('/new-account', (req, res) => {
-    res.render('new-account.ejs', {id: req.query.id})
-})
+    res.render('new-account.ejs', { id: req.query.id })
+});
 
 
 // DASHBOARD
 app.get('/dashboard', redirectToLogin, (req, res) => {
-    res.render('dashboard.ejs');
+    res.render('dashboard.ejs', {usertype: req.session.userType});
 })
 
 
@@ -90,4 +92,30 @@ app.get('/logout', redirectToLogin, (req, res) => {
     req.session.destroy();
     res.redirect('/');
 })
+
+
+// API
+app.post('/api/ujKurzus', async (req, res) => {
+    if (req.session.userType == 'oktato') {
+        try {
+            db.ujKurzus(req.session.userID, req.body.kurzusNev);
+        }
+        catch {
+            res.status(500);
+        }
+        res.status(200);
+    }
+})
+
+app.get('/api/osszesKurzusom', async (req, res) => {
+    if (req.session.userType == 'oktato') {
+        let rows = await db.osszesKurzusom(req.session.userID);
+        res.json({rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+})
+
+
 app.listen(3000);
