@@ -74,6 +74,8 @@ async function login(id, password, table) {
     }
 }
 
+
+// KURZUSOK
 async function ujKurzus(id, nev) {
     let tempConn = await conn();
     await tempConn.execute(`INSERT INTO KURZUS (OKTATOID, KURZUSNEV) VALUES(:id, :nev)`, [id, nev]);
@@ -86,9 +88,135 @@ async function osszesKurzusom(id) {
     return user.rows;
 }
 
+async function deleteKurzus(userID, kurzusID) {
+    let tempConn = conn();
+    let result = await (await tempConn).execute(`SELECT (OKTATOID) FROM KURZUS WHERE KURZUSID = :kurzusID`, [kurzusID]);
+    console.log(result);
+    if (result.rows[0][0] != userID) {
+        throw "Unauthorized";
+    }
+    console.log('elotte')
+    try {
+        await (await tempConn).execute(`DELETE FROM KURZUS WHERE KURZUSID = :kurzusid`, [kurzusID]);
+    } catch (error) {
+        console.log(error)
+    }
+    console.log('utana');
+    return;
+}
+
+
+// VIZSGAK
+async function ujVizsga(oktatoID, kurzusID, kezdes, hossz, ferohelyek) {
+    let kezsesIdopontja = new Date(Date.parse(kezdes)).toISOString();
+    let vegzesIdopontja = new Date(Date.parse(kezdes) + (hossz * 60000)).toISOString();
+    let tempConn = await conn();
+    let result = await tempConn.execute(`SELECT (OKTATOID) FROM KURZUS WHERE KURZUSID = :kurzusid`, [kurzusID]);
+    if (result.rows[0][0] != oktatoID) {
+        console.warn(result.rows)
+        throw "Unauthorized";
+    }
+    try {
+        await tempConn.execute(`
+        INSERT INTO Vizsgaalkalom(KurzusID, kezdesIdopont, vegzesIdopont, ferohelyekSzama)
+    VALUES(:kurzusid, TO_DATE(:kezdes,'YYYY-MM-DD"T"HH24:MI:SS."000Z"'), TO_DATE(:vegzes,'YYYY-MM-DD"T"HH24:MI:SS."000Z"'), :ferohelyek)`,
+            [kurzusID, kezsesIdopontja, vegzesIdopontja, ferohelyek]);
+        return;
+    }
+    catch (err) {
+        console.log(err);
+    }
+    return;
+}
+
+async function osszesVizsgam(id) {
+    let tempConn = await conn();
+    try {
+        let vizsgak = await tempConn.execute(`SELECT VIZSGAALKALOM.VIZSGAALKALOMID, KURZUS.KURZUSNEV, VIZSGAALKALOM.KEZDESIDOPONT, VIZSGAALKALOM.VEGZESIDOPONT, VIZSGAALKALOM.FEROHELYEKSZAMA 
+        FROM VIZSGAALKALOM, KURZUS 
+        WHERE VIZSGAALKALOM.KURZUSID = KURZUS.KURZUSID AND KURZUS.OKTATOID = :oktatoid`, [id]);
+        return vizsgak.rows;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function felvehetoKurzusok(hallgatoID) {
+    let tempConn = await conn();
+    let kurzusok = await tempConn.execute(`
+        SELECT KURZUS.KURZUSID, KURZUS.KURZUSNEV FROM
+        KURZUS FULL OUTER JOIN KURZUSFELVETEL
+        ON KURZUS.KURZUSID = KURZUSFELVETEL.KURZUSID
+        WHERE KURZUSFELVETEL.HALLGATOID != :hallgatoID OR KURZUSFELVETEL.KURZUSID IS NULL
+    `, [hallgatoID]);
+    return kurzusok.rows;
+}
+
+async function felvettKurzusaim(hallgatoID) {
+    let tempConn = await conn();
+    let kurzusok = await tempConn.execute(`
+        SELECT KURZUS.KURZUSID, KURZUS.KURZUSNEV FROM
+        KURZUS LEFT JOIN KURZUSFELVETEL
+        ON KURZUS.KURZUSID = KURZUSFELVETEL.KURZUSID
+        WHERE KURZUSFELVETEL.HALLGATOID = :hallgatoID
+    `, [hallgatoID]);
+    return kurzusok.rows;
+}
+
+async function kurzusJelentkezes(hallgatoID, kurzusID) {
+    let tempConn = await conn();
+    await tempConn.execute(`INSERT INTO KURZUSFELVETEL (HALLGATOID, KURZUSID) VALUES (:hallgatoID, :kurzusID)`, [hallgatoID, kurzusID]);
+    return;
+}
+
+// VIZSGAIM
+async function felvehetoVizsgak(hallgatoID) {
+    let tempConn = await conn();
+    let vizsgak = await tempConn.execute(`
+        SELECT VIZSGAALKALOM.VIZSGAALKALOMID, KURZUS.KURZUSNEV, VIZSGAALKALOM.KEZDESIDOPONT, VIZSGAALKALOM.VEGZESIDOPONT, VIZSGAALKALOM.FEROHELYEKSZAMA FROM
+        VIZSGAALKALOM FULL OUTER JOIN VIZSGAFELVETEL
+        ON VIZSGAFELVETEL.VIZSGAALKALOMID = VIZSGAFELVETEL.VIZSGAALKALOMID
+        LEFT JOIN KURZUS
+        ON KURZUS.KURZUSID = VIZSGAALKALOM.KURZUSID
+        WHERE VIZSGAFELVETEL.HALLGATOID != :hallgatoID OR VIZSGAFELVETEL.VIZSGAALKALOMID IS NULL
+    `, [hallgatoID]);
+    return vizsgak.rows;
+}
+
+async function felvettVizsgaim(hallgatoID) {
+    let tempConn = await conn();
+    let vizsgak = await tempConn.execute(`
+        SELECT VIZSGAALKALOM.VIZSGAALKALOMID, KURZUS.KURZUSNEV, VIZSGAALKALOM.KEZDESIDOPONT, VIZSGAALKALOM.VEGZESIDOPONT, VIZSGAALKALOM.FEROHELYEKSZAMA FROM
+        VIZSGAALKALOM LEFT JOIN VIZSGAFELVETEL
+        ON VIZSGAFELVETEL.VIZSGAALKALOMID = VIZSGAFELVETEL.VIZSGAALKALOMID
+        LEFT JOIN KURZUS
+        ON KURZUS.KURZUSID = VIZSGAALKALOM.KURZUSID
+        WHERE VIZSGAFELVETEL.HALLGATOID = :hallgatoID
+    `, [hallgatoID]);
+    return vizsgak.rows;
+}
+
+async function vizsgaJelentkezes(hallgatoID, vizsgaID) {
+    let tempConn = await conn();
+    await tempConn.execute(`INSERT INTO VIZSGAFELVETEL (HALLGATOID, VIZSGAALKALOMID) VALUES (:hallgatoID, :vizsgaID)`, [hallgatoID, vizsgaID]);
+    return;
+}
 
 
 exports.register = register;
 exports.login = login;
+
 exports.ujKurzus = ujKurzus;
 exports.osszesKurzusom = osszesKurzusom;
+exports.deleteKurzus = deleteKurzus;
+
+exports.ujVizsga = ujVizsga;
+exports.osszesVizsgam = osszesVizsgam;
+
+exports.felvehetoKurzusok = felvehetoKurzusok;
+exports.felvettKurzusaim = felvettKurzusaim;
+exports.kurzusJelentkezes = kurzusJelentkezes;
+
+exports.felvehetoVizsgak = felvehetoVizsgak;
+exports.felvettVizsgaim = felvettVizsgaim;
+exports.vizsgaJelentkezes = vizsgaJelentkezes;

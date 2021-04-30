@@ -1,0 +1,164 @@
+<div class="row">
+    <div class="col col-sm-3 bg-light p-5" id="navigation">
+
+        <!--KURZUSOK-->
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="kurzusokButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Kurzusok
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="kurzusokButton">
+              <li><a class="dropdown-item" href="#felvehetoKurzusokPage">Felvehető kurzusok</a></li>
+              <li><a class="dropdown-item" href="#felvettKurzusaimPage">Felvett kurzusaim</a></li>
+            </ul>
+          </div>
+
+          <!--VIZSGAK-->
+          <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" id="vizsgakButton" data-bs-toggle="dropdown" aria-expanded="false">
+              Vizsgák
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="vizsgakButton">
+              <li><a class="dropdown-item" href="#felvehetoVizsgakPage">Felvehető vizsgaalkalmak</a></li>
+              <li><a class="dropdown-item" href="#felvettVizsgaimPage">Felvett vizsgaalkalmak</a></li>
+            </ul>
+          </div>
+    </div>
+
+    <!--CONTENT-->
+    <div class="col" id="content" style="padding-top: 70px;">
+        <div id="felvehetoKurzusokPage" class="d-none">
+            <table class="table">
+                <thead>
+                    <th>Kurzus ID</th>
+                    <th>Kurzus Neve</th>
+                    <th></th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div id="felvettKurzusaimPage" class="d-none">
+            <table class="table">
+                <thead>
+                    <th>Kurzus ID</th>
+                    <th>Kurzus Neve</th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+
+
+        <div id="felvehetoVizsgakPage" class="d-none">
+            <table class="table">
+                <thead>
+                    <th>Vizsga ID</th>
+                    <th>Kurzus Neve</th>
+                    <th>Kezdés</th>
+                    <th>Vége</th>
+                    <th>Férőhelyek</th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div id="felvettVizsgaimPage" class="d-none">
+            <table class="table">
+                <thead>
+                    <th>Vizsga ID</th>
+                    <th>Kurzus Neve</th>
+                    <th>Férőhelyek</th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    window.$ = document.querySelector.bind(document);
+    window.$$ = document.querySelectorAll.bind(document);
+
+    $$('[href^="#"]').forEach(item => {
+        item.addEventListener('click', () => {
+            $$('#content > div').forEach(item => {item.classList.add('d-none')});
+            $('#content > ' + item.attributes.href.value).classList.remove('d-none');
+        })
+    });
+
+    $('[href="#felvehetoKurzusokPage"]').onclick = async () => {
+        let kurzusok = await fetch('/api/felvehetoKurzusok');
+        kurzusok = await kurzusok.json();
+        console.log(kurzusok)
+        let html = '';
+        kurzusok.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>
+                    <form method="POST" action="/api/kurzusJelentkezes">
+                        <input type="hidden" name="kurzusID" value="${row[0]}">
+                        <input type="submit" value="Jelentkezés" class="btn btn-primary">
+                    </form>
+                </td>
+            </tr>
+            `;
+        });
+        $('#felvehetoKurzusokPage tbody').innerHTML = html;
+    }
+
+    $('[href="#felvettKurzusaimPage"]').onclick = async () => {
+        let kurzusok = await fetch('/api/felvettKurzusaim');
+        kurzusok = await kurzusok.json();
+        console.log(kurzusok)
+        let html = '';
+        kurzusok.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                
+            </tr>
+            `;
+        });
+        $('#felvettKurzusaimPage tbody').innerHTML = html;
+    }
+
+
+    //vizsgak
+    $('[href="#felvehetoVizsgakPage"]').onclick = async () => {
+        let vizsgak = await fetch('/api/felvehetoVizsgak');
+        vizsgak = await vizsgak.json();
+        console.log(vizsgak)
+        let html = '';
+        vizsgak.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>${row[2]}</td>
+                <td>${row[3]}</td>
+                <td>${row[4]}</td>
+                <td>
+                    <form method="POST" action="/api/vizsgaJelentkezes">
+                        <input type="hidden" name="vizsgaID" value="${row[0]}">
+                        <input type="submit" value="Jelentkezés" class="btn btn-primary">
+                    </form>
+                </td>
+            </tr>
+            `;
+        });
+        $('#felvehetoVizsgakPage tbody').innerHTML = html;
+    }
+</script>

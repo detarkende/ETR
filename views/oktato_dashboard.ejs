@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col col-sm-3 min-vh-100 bg-light p-5">
+    <div class="col col-sm-3 bg-light p-5" id="navigation">
 
         <!--KURZUSOK-->
         <div class="dropdown">
@@ -23,11 +23,13 @@
             </ul>
           </div>
     </div>
+
+    <!--CONTENT-->
     <div class="col" id="content" style="padding-top: 70px;">
         <div id="ujKurzusPage" class="d-none">
-            <form>
+            <form method="POST" action="/api/ujKurzus">
                 <label for="kurzusnev">Kurzus neve</label>
-                <input type="text" class="form-control" maxlength="50" id="kurzusnev">
+                <input type="text" name="kurzusNev" class="form-control" maxlength="50" id="kurzusnev">
                 <button id="ujKurzusHozzaadasa" class="btn btn-primary my-3">Hozzáadás</button>
             </form>
         </div>
@@ -49,21 +51,40 @@
 
 
         <div id="ujVizsgaPage" class="d-none">
-            <form>
-                <label for="vizsgaNev">Vizsga neve</label>
-                <input type="text" class="form-control" maxlength="50" id="vizsgaNev">
+            <form method="POST" action="/api/ujVizsga">
+                <label for="kurzus">Kurzus</label>
+                <select class="form-select" name="kurzusID" id="kurzusIDSelect">
+                    
+                </select>
 
                 <label for="vizsgaIdopontja">Vizsga kezdetének időpontja</label>
-                <input type="time" class="form-control" name="kezdesiIdo" id="vizsgaIdopontja">
+                <input type="datetime-local" class="form-control" name="kezdesiIdo" id="vizsgaIdopontja">
 
                 <label for="vizsgaHossza">Vizsga hossza (percben)</label>
-                <input type="number" class="form-control" name="vizsgaHossz" min="0" step="5" id="vizsgaHossza">
+                <input type="number" class="form-control" name="vizsgaHossza" min="0" step="5" id="vizsgaHossza">
+
+                <label for="ferohelyekSzama">Férőhelyek száma</label>
+                <input type="number" class="form-control" name="ferohelyekSzama" min="0" step="1" id="ferohelyekSzama">
+
                 <button id="ujVizsgaHozzaadasa" class="btn btn-primary my-3">Hozzáadás</button>
             </form>
         </div>
 
         <div id="osszesVizsgamPage" class="d-none">
-            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Vizsga ID</th>
+                        <th>Kurzus neve</th>
+                        <th>Vizsga kezdete</th>
+                        <th>Vizsga vége</th>
+                        <th>Férőhelyek</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
         </div>
 
 
@@ -81,31 +102,64 @@
         })
     });
 
-    $('#ujKurzusHozzaadasa').onclick = async (e) => {
-        e.preventDefault();
-        if (e.currentTarget.parentNode.matches(':valid')){
-            let nev = $('#kurzusnev').value;
-            let response = await fetch('/api/ujKurzus', {method: 'POST', body: JSON.stringify({body: nev})});
-            if (response.status == 500) {
-                alert('Szerverhiba, 500')
-            }
-        }
-    }
-
     $('[href="#osszesKurzusomPage"]').onclick = async () => {
         let kurzusok = await fetch('/api/osszesKurzusom');
-        console.log(kurzusok);
-        kurzusok = await JSON.parse(kurzusok.json);
-        console.log(kurzusok);
+        kurzusok = await kurzusok.json();
+        console.log(kurzusok.rows)
         let html = '';
-        kurzusok.forEach(row => {
+        kurzusok.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[2]}</td>
+                <td>
+                    <form method="POST" action="/api/deleteKurzus">
+                        <input type="hidden" name="kurzusid" value="${row[0]}">
+                        <input type="submit" value="Kurzus törlése" class="btn btn-danger">
+                    </form>
+                </td>
+            </tr>`;
+        });
+        $('#osszesKurzusomPage tbody').innerHTML = html;
+    }
+
+
+    $('[href="#ujVizsgaPage"]').onclick = async () => {
+        let kurzusok = await fetch('/api/osszesKurzusom');
+        kurzusok = await kurzusok.json();
+        console.log(kurzusok.rows)
+        let html = '';
+        kurzusok.rows.forEach(row => {
+            html += `
+            <option value="${row[0]}">${row[2]}</option>
+            `;
+        });
+        $('#kurzusIDSelect').innerHTML = html;
+    }
+
+
+    $('[href="#osszesVizsgamPage"]').onclick = async () => {
+        let vizsgak = await fetch('/api/osszesVizsgam');
+        vizsgak = await vizsgak.json();
+        console.log(vizsgak.rows)
+        let html = '';
+        vizsgak.rows.forEach(row => {
             html += `
             <tr>
                 <td>${row[0]}</td>
                 <td>${row[1]}</td>
+                <td>${new Date(Date.parse(row[2])).toLocaleString('hu')}</td>
+                <td>${new Date(Date.parse(row[3])).toLocaleString('hu')}</td>
+                <td>${row[4]}</td>
+                <td>
+                    <form method="POST" action="/api/deleteVizsga">
+                        <input type="hidden" name="vizsgaid" value="${row[0]}">
+                        <input type="submit" value="Vizsga törlése" class="btn btn-danger">
+                    </form>
+                </td>
             </tr>`;
         });
-        $('#osszesKurzusomPage tbody').innerHTML = html;
+        $('#osszesVizsgamPage tbody').innerHTML = html;
     }
 
 </script>

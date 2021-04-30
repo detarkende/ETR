@@ -98,6 +98,7 @@ app.get('/logout', redirectToLogin, (req, res) => {
 app.post('/api/ujKurzus', async (req, res) => {
     if (req.session.userType == 'oktato') {
         try {
+            console.log(req.body);
             db.ujKurzus(req.session.userID, req.body.kurzusNev);
         }
         catch {
@@ -110,7 +111,22 @@ app.post('/api/ujKurzus', async (req, res) => {
 app.get('/api/osszesKurzusom', async (req, res) => {
     if (req.session.userType == 'oktato') {
         let rows = await db.osszesKurzusom(req.session.userID);
-        res.json({rows: rows });
+        res.json({ rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+});
+
+app.post('/api/deleteKurzus', async (req, res) => {
+    if (req.session.userType == 'oktato') {
+        try {
+            await db.deleteKurzus(req.session.userID, req.body.kurzusid);
+            res.redirect('/dashboard');
+        }
+        catch {
+            res.status(400);
+        }
     }
     else {
         res.status(400);
@@ -118,4 +134,74 @@ app.get('/api/osszesKurzusom', async (req, res) => {
 })
 
 
+app.post('/api/ujVizsga', async (req, res) => {
+    if (req.session.userType == 'oktato') {
+        await db.ujVizsga(req.session.userID, req.body.kurzusID, req.body.kezdesiIdo, req.body.vizsgaHossza, req.body.ferohelyekSzama);
+        res.redirect('/dashboard');
+    }
+    else {
+        res.status(400);
+    }
+})
+
+app.get('/api/osszesVizsgam', async (req, res) => {
+    if (req.session.userType == 'oktato') {
+        let rows = await db.osszesVizsgam(req.session.userID);
+        res.json({ rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+});
+
+app.get('/api/felvehetoKurzusok', async (req, res) => {
+    if (req.session.userType == 'hallgato') {
+        let rows = await db.felvehetoKurzusok(req.session.userID);
+        res.json({ rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+});
+app.get('/api/felvettKurzusaim', async (req, res) => {
+    if (req.session.userType == 'hallgato') {
+        let rows = await db.felvettKurzusaim(req.session.userID);
+        res.json({ rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+});
+
+app.post('/api/kurzusJelentkezes', async (req, res) => {
+    if (req.session.userType == 'hallgato') {
+        db.kurzusJelentkezes(req.session.userID, req.body.kurzusID);
+    }
+    else {
+        res.status(400);
+    }
+});
+
+app.get('/api/felvehetoVizsgak', async (req, res) => {
+    if (req.session.userType == 'hallgato') {
+        let rows = await db.felvehetoVizsgak(req.session.userID);
+        res.json({ rows: rows });
+    }
+    else {
+        res.status(400);
+    }
+});
+
+app.post('/api/vizsgaJelentkezes', async (req, res) => {
+    if (req.session.userType == 'hallgato') {
+        try {
+            await db.vizsgaJelentkezes(req.session.userID, req.body.vizsgaID);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    else {
+        res.status(400);
+    }
+});
 app.listen(3000);
