@@ -194,7 +194,7 @@ app.post('/api/kurzusJelentkezes', async (req, res) => {
     else {
         res.status(400);
     }
-});
+});ç
 app.post('/api/kurzusLeadas', async (req, res) => {
     if (req.session.userType == 'hallgato') {
         await db.kurzusLeadas(req.session.userID, req.body.kurzusID);
