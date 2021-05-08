@@ -1,6 +1,7 @@
 <div class="row">
     <div class="col col-sm-3 bg-light p-5" id="navigation">
 
+        <a href="#hirekPage" class="btn">Hírek</a>
         <!--KURZUSOK-->
         <div class="dropdown">
             <button class="btn dropdown-toggle" type="button" id="kurzusokButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -26,6 +27,21 @@
 
     <!--CONTENT-->
     <div class="col" id="content" style="padding-top: 70px;">
+
+        <div id="hirekPage">
+            <table class="table">
+                <thead>
+                    <th>Feladó</th>
+                    <th>Cím</th>
+                    <th>Közzététel időpontja</th>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+
+
         <div id="felvehetoKurzusokPage" class="d-none">
             <table class="table">
                 <thead>
@@ -44,6 +60,7 @@
                 <thead>
                     <th>Kurzus ID</th>
                     <th>Kurzus Neve</th>
+                    <th></th>
                 </thead>
                 <tbody>
 
@@ -73,7 +90,10 @@
                 <thead>
                     <th>Vizsga ID</th>
                     <th>Kurzus Neve</th>
+                    <th>Kezdés</th>
+                    <th>Vége</th>
                     <th>Férőhelyek</th>
+                    <th></th>
                 </thead>
                 <tbody>
 
@@ -89,6 +109,10 @@
     window.$ = document.querySelector.bind(document);
     window.$$ = document.querySelectorAll.bind(document);
 
+    window.onload = function(){
+        $('[href="#hirekPage"]').click();
+    }
+
     $$('[href^="#"]').forEach(item => {
         item.addEventListener('click', () => {
             $$('#content > div').forEach(item => {item.classList.add('d-none')});
@@ -96,10 +120,29 @@
         })
     });
 
+    $('[href="#hirekPage"]').onclick = async () => {
+        let hirek = await fetch('/api/hirek');
+        hirek = await hirek.json();
+        let html = '';
+        hirek.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${(row[0] == undefined ? 'ADMIN': row[0])}</td>
+                <td><details>
+                    <summary><b>${row[1]}</b></summary>
+                    ${row[2]}
+                </details></td>
+                <td>${new Date(row[3]).toLocaleString('hu')}</td>
+            </tr>
+            `;
+        });
+        $('#hirekPage tbody').innerHTML = html;
+    }
+
+
     $('[href="#felvehetoKurzusokPage"]').onclick = async () => {
         let kurzusok = await fetch('/api/felvehetoKurzusok');
         kurzusok = await kurzusok.json();
-        console.log(kurzusok)
         let html = '';
         kurzusok.rows.forEach(row => {
             html += `
@@ -128,6 +171,12 @@
             <tr>
                 <td>${row[0]}</td>
                 <td>${row[1]}</td>
+                <td>
+                    <form method="POST" action="/api/kurzusLeadas">
+                        <input type="hidden" name="kurzusID" value="${row[0]}">
+                        <input type="submit" class="btn btn-danger" value="Leadás">        
+                    </form>
+                </td>
                 
             </tr>
             `;
@@ -147,8 +196,8 @@
             <tr>
                 <td>${row[0]}</td>
                 <td>${row[1]}</td>
-                <td>${row[2]}</td>
-                <td>${row[3]}</td>
+                <td>${new Date(row[2]).toLocaleString('hu')}</td>
+                <td>${new Date(row[3]).toLocaleString('hu')}</td>
                 <td>${row[4]}</td>
                 <td>
                     <form method="POST" action="/api/vizsgaJelentkezes">
@@ -160,5 +209,30 @@
             `;
         });
         $('#felvehetoVizsgakPage tbody').innerHTML = html;
+    }
+
+    $('[href="#felvettVizsgaimPage"]').onclick = async () => {
+        let vizsgak = await fetch('/api/felvettVizsgaim');
+        vizsgak = await vizsgak.json();
+        console.log(vizsgak)
+        let html = '';
+        vizsgak.rows.forEach(row => {
+            html += `
+            <tr>
+                <td>${row[0]}</td>
+                <td>${row[1]}</td>
+                <td>${new Date(row[2]).toLocaleString('hu')}</td>
+                <td>${new Date(row[3]).toLocaleString('hu')}</td>
+                <td>${row[4]}</td>
+                <td>
+                    <form method="POST" action="/api/vizsgaLeadas">
+                        <input type="hidden" name="vizsgaID" value="${row[0]}">
+                        <input type="submit" class="btn btn-danger" value="Leadás">        
+                    </form>
+                </td>
+            </tr>
+            `;
+        });
+        $('#felvettVizsgaimPage tbody').innerHTML = html;
     }
 </script>

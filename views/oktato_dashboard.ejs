@@ -1,6 +1,7 @@
 <div class="row">
     <div class="col col-sm-3 bg-light p-5" id="navigation">
 
+        <a href="#ujHirPage" class="btn">Új hír közzététele</a>
         <!--KURZUSOK-->
         <div class="dropdown">
             <button class="btn dropdown-toggle" type="button" id="kurzusokButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -26,6 +27,15 @@
 
     <!--CONTENT-->
     <div class="col" id="content" style="padding-top: 70px;">
+
+        <div id="ujHirPage" class="d-none">
+            <form action="/api/ujHir" method="POST" class="w-md-50">
+                <input class="form-control my-2" type="text" name="cim" maxlength="500" required placeholder="Cím">
+                <textarea class="form-control my-2" name="szovegtorzs" maxlength="2000" cols="30" rows="10" required placeholder="Szövegtörzs"></textarea>
+                <input type="submit" value="Közzététel" class="btn btn-primary my-3">
+            </form>
+        </div>
+
         <div id="ujKurzusPage" class="d-none">
             <form method="POST" action="/api/ujKurzus">
                 <label for="kurzusnev">Kurzus neve</label>
